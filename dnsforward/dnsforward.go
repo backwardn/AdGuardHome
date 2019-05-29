@@ -222,6 +222,12 @@ func (s *Server) startInternal(config *ServerConfig) error {
 
 	convertArrayToMap(&s.BlockedHosts, s.conf.BlockedHosts)
 
+	u := unboundUpstreamNew()
+	if u != nil {
+		proxyConfig.Upstreams = nil
+		proxyConfig.Upstreams = append(proxyConfig.Upstreams, u)
+	}
+
 	if s.conf.TLSListenAddr != nil && s.conf.CertificateChain != "" && s.conf.PrivateKey != "" {
 		proxyConfig.TLSListenAddr = s.conf.TLSListenAddr
 		keypair, err := tls.X509KeyPair([]byte(s.conf.CertificateChain), []byte(s.conf.PrivateKey))
@@ -291,6 +297,13 @@ func (s *Server) stopInternal() error {
 	if s.dnsFilter != nil {
 		s.dnsFilter.Destroy()
 		s.dnsFilter = nil
+	}
+
+	for _, u := range s.conf.Upstreams {
+		uu, ok := u.(*unboundUpstream)
+		if ok {
+			unboundUpstreamClose(uu)
+		}
 	}
 
 	// flush remainder to file
