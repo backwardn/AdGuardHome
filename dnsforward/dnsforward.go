@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/AdguardTeam/AdGuardHome/dnsfilter"
+	"github.com/AdguardTeam/AdGuardHome/unboundupstream"
 	"github.com/AdguardTeam/dnsproxy/proxy"
 	"github.com/AdguardTeam/dnsproxy/upstream"
 	"github.com/AdguardTeam/golibs/log"
@@ -79,6 +80,8 @@ type FilteringConfig struct {
 	AllowedClients    []string `yaml:"allowed_clients"`    // IP addresses of whitelist clients
 	DisallowedClients []string `yaml:"disallowed_clients"` // IP addresses of clients that should be blocked
 	BlockedHosts      []string `yaml:"blocked_hosts"`      // hosts that should be blocked
+
+	UnboundSettings []string `yaml:"unbound_settings"` // List of settings for 'unbound' module
 
 	dnsfilter.Config `yaml:",inline"`
 }
@@ -291,6 +294,13 @@ func (s *Server) stopInternal() error {
 	if s.dnsFilter != nil {
 		s.dnsFilter.Destroy()
 		s.dnsFilter = nil
+	}
+
+	for _, u := range s.conf.Upstreams {
+		uu, ok := u.(*unboundupstream.UnboundUpstream)
+		if ok {
+			uu.Close()
+		}
 	}
 
 	// flush remainder to file

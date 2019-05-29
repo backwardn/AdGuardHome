@@ -412,6 +412,10 @@ func validateUpstream(u string) (bool, error) {
 		return defaultUpstream, fmt.Errorf("wrong protocol")
 	}
 
+	if u == "unbound" {
+		return defaultUpstream, nil
+	}
+
 	// Check if upstream is valid plain DNS
 	return defaultUpstream, checkPlainDNS(u)
 }

@@ -3,7 +3,7 @@ module github.com/AdguardTeam/AdGuardHome
 go 1.12
 
 require (
-	github.com/AdguardTeam/dnsproxy v0.15.0
+	github.com/AdguardTeam/dnsproxy v0.15.1
 	github.com/AdguardTeam/golibs v0.1.3
 	github.com/AdguardTeam/urlfilter v0.3.0
 	github.com/NYTimes/gziphandler v1.1.1
@@ -15,6 +15,7 @@ require (
 	github.com/kardianos/service v0.0.0-20181115005516-4c239ee84e7b
 	github.com/krolaw/dhcp4 v0.0.0-20180925202202-7cead472c414
 	github.com/miekg/dns v1.1.8
+	github.com/miekg/unbound v0.0.0-20180419064740-e2b53b2dbcba
 	github.com/sparrc/go-ping v0.0.0-20181106165434-ef3ab45e41b0
 	github.com/stretchr/testify v1.3.0
 	golang.org/x/net v0.0.0-20190424112056-4829fb13d2c6

@@ -10,6 +10,7 @@ import (
 
 	"github.com/AdguardTeam/AdGuardHome/dnsfilter"
 	"github.com/AdguardTeam/AdGuardHome/dnsforward"
+	"github.com/AdguardTeam/AdGuardHome/unboundupstream"
 	"github.com/AdguardTeam/dnsproxy/proxy"
 	"github.com/AdguardTeam/dnsproxy/upstream"
 	"github.com/AdguardTeam/golibs/log"
@@ -204,10 +205,25 @@ func generateServerConfig() dnsforward.ServerConfig {
 		}
 	}
 
-	upstreamConfig, err := proxy.ParseUpstreamsConfig(config.DNS.UpstreamDNS, config.DNS.BootstrapDNS, dnsforward.DefaultTimeout)
+	// set callback function which creates an upstream object
+	addressToUpstreamFunction := func(address string, opts upstream.Options) (upstream.Upstream, error) {
+
+		if address == "unbound" {
+			u, err := unboundupstream.New(newconfig.FilteringConfig.UnboundSettings)
+			if err != nil {
+				return nil, fmt.Errorf("unbound: %s", err)
+			}
+			return u, nil
+		}
+
+		return upstream.AddressToUpstream(address, opts)
+	}
+
+	upstreamConfig, err := proxy.ParseUpstreamsConfigEx(config.DNS.UpstreamDNS, config.DNS.BootstrapDNS, dnsforward.DefaultTimeout, addressToUpstreamFunction)
 	if err != nil {
 		log.Error("Couldn't get upstreams configuration cause: %s", err)
 	}
+
 	newconfig.Upstreams = upstreamConfig.Upstreams
 	newconfig.DomainsReservedUpstreams = upstreamConfig.DomainReservedUpstreams
 	newconfig.AllServers = config.DNS.AllServers
