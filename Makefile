@@ -42,30 +42,30 @@ _unbound:
 
 # build on Ubuntu or Fedora for itself (AMD64)
 unbound-linux:
-	CGO_CFLAGS="-I$(THISPATH)/unbound" \
-		CGO_LDFLAGS="-L$(THISPATH)/unbound/ubuntu-amd64 -Wl,-rpath-link,$(THISPATH)/unbound/ubuntu-amd64" \
+	CGO_CFLAGS="-I$(THISPATH)/libunbound" \
+		CGO_LDFLAGS="-L$(THISPATH)/libunbound/ubuntu-amd64 -Wl,-rpath-link,$(THISPATH)/libunbound/ubuntu-amd64" \
 		make -f Makefile _unbound
 
 # build on Fedora for ARM
 unbound-fedora-arm:
-	CGO_CFLAGS="-I/usr/arm-linux-gnu/include -I$(THISPATH)/unbound" \
-		CGO_LDFLAGS="-L$(THISPATH)/unbound/raspbian-arm -Wl,-rpath-link,$(THISPATH)/unbound/raspbian-arm" \
+	CGO_CFLAGS="-I/usr/arm-linux-gnu/include -I$(THISPATH)/libunbound" \
+		CGO_LDFLAGS="-L$(THISPATH)/libunbound/raspbian-arm -Wl,-rpath-link,$(THISPATH)/libunbound/raspbian-arm" \
 		make -f Makefile _unbound \
 		_GOOS=linux _GOARCH=arm _GOARM=6 \
 		_CC=arm-linux-gnu-gcc
 
 # build on Ubuntu for ARM
 unbound-ubuntu-arm:
-	CGO_CFLAGS="-I/usr/arm-linux-gnu/include -I$(THISPATH)/unbound" \
-		CGO_LDFLAGS="-L$(THISPATH)/unbound/raspbian-arm -Wl,-rpath-link,$(THISPATH)/unbound/raspbian-arm" \
+	CGO_CFLAGS="-I/usr/arm-linux-gnu/include -I$(THISPATH)/libunbound" \
+		CGO_LDFLAGS="-L$(THISPATH)/libunbound/raspbian-arm -Wl,-rpath-link,$(THISPATH)/libunbound/raspbian-arm" \
 		make -f Makefile _unbound \
 		_GOOS=linux _GOARCH=arm _GOARM=6 \
 		_CC=arm-linux-gnueabihf-gcc
 
 # build on macOS for ARM
 unbound-mac-arm:
-	CGO_CFLAGS="-I$(MAC_XCOMPILER_PATH)/arm-none-linux-gnueabi/sysroot/usr/include -I$(THISPATH)/unbound" \
-		CGO_LDFLAGS="-L$(THISPATH)/unbound/raspbian-arm -Wl,-rpath-link,$(THISPATH)/unbound/raspbian-arm" \
+	CGO_CFLAGS="-I$(MAC_XCOMPILER_PATH)/arm-none-linux-gnueabi/sysroot/usr/include -I$(THISPATH)/libunbound" \
+		CGO_LDFLAGS="-L$(THISPATH)/libunbound/raspbian-arm -Wl,-rpath-link,$(THISPATH)/libunbound/raspbian-arm" \
 		make -f Makefile _unbound \
 		_GOOS=linux _GOARCH=arm _GOARM=6 \
 		_CC=arm-none-linux-gnueabi-gcc \
