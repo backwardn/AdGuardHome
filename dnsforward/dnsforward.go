@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/AdguardTeam/AdGuardHome/dnsfilter"
+	"github.com/AdguardTeam/AdGuardHome/unboundupstream"
 	"github.com/AdguardTeam/dnsproxy/proxy"
 	"github.com/AdguardTeam/dnsproxy/upstream"
 	"github.com/AdguardTeam/golibs/log"
@@ -222,7 +223,7 @@ func (s *Server) startInternal(config *ServerConfig) error {
 
 	convertArrayToMap(&s.BlockedHosts, s.conf.BlockedHosts)
 
-	u := unboundUpstreamNew()
+	u := unboundupstream.New()
 	if u != nil {
 		proxyConfig.Upstreams = nil
 		proxyConfig.Upstreams = append(proxyConfig.Upstreams, u)
@@ -300,9 +301,9 @@ func (s *Server) stopInternal() error {
 	}
 
 	for _, u := range s.conf.Upstreams {
-		uu, ok := u.(*unboundUpstream)
+		uu, ok := u.(*unboundupstream.UnboundUpstream)
 		if ok {
-			unboundUpstreamClose(uu)
+			uu.Close()
 		}
 	}
 

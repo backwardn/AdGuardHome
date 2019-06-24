@@ -1,31 +1,31 @@
 // +build agh_mod_unbound
 
-package dnsforward
+package unboundupstream
 
 import (
 	"github.com/miekg/dns"
 	"github.com/miekg/unbound"
 )
 
-type unboundUpstream struct {
+type UnboundUpstream struct {
 	ctx *unbound.Unbound
 }
 
-func unboundUpstreamNew() *unboundUpstream {
-	u := unboundUpstream{}
+func New() *UnboundUpstream {
+	u := UnboundUpstream{}
 	u.ctx = unbound.New()
 	return &u
 }
 
-func unboundUpstreamClose(u *unboundUpstream) {
+func (u *UnboundUpstream) Close() {
 	u.ctx.Destroy()
 }
 
-func (u *unboundUpstream) Address() string {
+func (u *UnboundUpstream) Address() string {
 	return "[unbound]"
 }
 
-func (u *unboundUpstream) Exchange(m *dns.Msg) (*dns.Msg, error) {
+func (u *UnboundUpstream) Exchange(m *dns.Msg) (*dns.Msg, error) {
 	r, err := u.ctx.Resolve(m.Question[0].Name, m.Question[0].Qtype, dns.ClassINET)
 	if err != nil {
 		return nil, err
