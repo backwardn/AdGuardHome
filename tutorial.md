@@ -9,6 +9,8 @@ Contents:
 
 ## Build AdGuard Home with libunbound support
 
+AdGuard Home can be built with its own DNS resolver so no other upstream DNS server is required for AdGuard Home to work.  This feature can be enabled at compile time only meaning that you must build it manually.  Also, it will work only when there are no upstream servers configured.
+
 To build AdGuard Home with support for libunbound, `cgo` must be used which means that the system must have gcc installed.  There is no need to install a development package for libunbound because we provide all necessary files: C include files and compiled binaries are located in `unbound/` directory.
 
 

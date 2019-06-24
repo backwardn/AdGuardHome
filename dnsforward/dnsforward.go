@@ -223,10 +223,12 @@ func (s *Server) startInternal(config *ServerConfig) error {
 
 	convertArrayToMap(&s.BlockedHosts, s.conf.BlockedHosts)
 
-	u := unboundupstream.New()
-	if u != nil {
-		proxyConfig.Upstreams = nil
-		proxyConfig.Upstreams = append(proxyConfig.Upstreams, u)
+	if len(proxyConfig.Upstreams) == 0 {
+		u := unboundupstream.New()
+		if u != nil {
+			proxyConfig.Upstreams = nil
+			proxyConfig.Upstreams = append(proxyConfig.Upstreams, u)
+		}
 	}
 
 	if s.conf.TLSListenAddr != nil && s.conf.CertificateChain != "" && s.conf.PrivateKey != "" {
