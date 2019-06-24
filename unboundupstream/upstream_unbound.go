@@ -3,6 +3,9 @@
 package unboundupstream
 
 import (
+	"fmt"
+	"log"
+
 	"github.com/miekg/dns"
 	"github.com/miekg/unbound"
 )
@@ -14,6 +17,12 @@ type UnboundUpstream struct {
 func New() *UnboundUpstream {
 	u := UnboundUpstream{}
 	u.ctx = unbound.New()
+	e := u.ctx.AddTaFile("./keys")
+	if e != nil {
+		log.Fatal(e)
+		u.Close()
+		return nil
+	}
 	return &u
 }
 
@@ -30,6 +39,18 @@ func (u *UnboundUpstream) Exchange(m *dns.Msg) (*dns.Msg, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	if r.Bogus {
+		// Bogus (security failed) can have many reasons, DNSSEC protects against alteration of the data in transit, signatures can expire, the trusted keys can be rolled over to fresh trusted keys, and many others
+		return nil, fmt.Errorf("Bogus: %s", r.WhyBogus)
+	}
+
+	if !r.Secure {
+		// Insecure happens when no DNSSEC security is configured for the domain name (or you simply forgot to add the trusted key)
+		return nil, fmt.Errorf("Insecure")
+	}
+
+	// Secure means that one of the trusted keys verifies the signatures on the data
 
 	resp := dns.Msg{}
 	resp.SetRcode(m, r.Rcode)
