@@ -17,7 +17,7 @@ type UnboundUpstream struct {
 func New() *UnboundUpstream {
 	u := UnboundUpstream{}
 	u.ctx = unbound.New()
-	e := u.ctx.AddTaFile("./keys")
+	e := u.ctx.AddTaFile("./keys") // "dig . DNSKEY >keys"
 	if e != nil {
 		log.Fatal(e)
 		u.Close()
