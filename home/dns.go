@@ -172,7 +172,7 @@ func onDNSRequest(d *proxy.DNSContext) {
 	}
 }
 
-func generateServerConfig() dnsforward.ServerConfig {
+func generateServerConfig() (dnsforward.ServerConfig, error) {
 	filters := []dnsfilter.Filter{}
 	userFilter := userFilter()
 	filters = append(filters, dnsfilter.Filter{
@@ -221,7 +221,7 @@ func generateServerConfig() dnsforward.ServerConfig {
 
 	upstreamConfig, err := proxy.ParseUpstreamsConfigEx(config.DNS.UpstreamDNS, config.DNS.BootstrapDNS, dnsforward.DefaultTimeout, addressToUpstreamFunction)
 	if err != nil {
-		log.Error("Couldn't get upstreams configuration cause: %s", err)
+		return newconfig, fmt.Errorf("Couldn't get upstreams configuration cause: %s", err)
 	}
 
 	newconfig.Upstreams = upstreamConfig.Upstreams
@@ -229,7 +229,7 @@ func generateServerConfig() dnsforward.ServerConfig {
 	newconfig.AllServers = config.DNS.AllServers
 	newconfig.FilterHandler = applyClientSettings
 	newconfig.OnDNSRequest = onDNSRequest
-	return newconfig
+	return newconfig, nil
 }
 
 // If a client has his own settings, apply them
@@ -251,8 +251,11 @@ func startDNSServer() error {
 		return fmt.Errorf("unable to start forwarding DNS server: Already running")
 	}
 
-	newconfig := generateServerConfig()
-	err := dnsServer.Start(&newconfig)
+	newconfig, err := generateServerConfig()
+	if err != nil {
+		return errorx.Decorate(err, "Couldn't start forwarding DNS server")
+	}
+	err = dnsServer.Start(&newconfig)
 	if err != nil {
 		return errorx.Decorate(err, "Couldn't start forwarding DNS server")
 	}
@@ -270,8 +273,11 @@ func reconfigureDNSServer() error {
 		return fmt.Errorf("Refusing to reconfigure forwarding DNS server: not running")
 	}
 
-	config := generateServerConfig()
-	err := dnsServer.Reconfigure(&config)
+	config, err := generateServerConfig()
+	if err != nil {
+		return errorx.Decorate(err, "Couldn't start forwarding DNS server")
+	}
+	err = dnsServer.Reconfigure(&config)
 	if err != nil {
 		return errorx.Decorate(err, "Couldn't start forwarding DNS server")
 	}
