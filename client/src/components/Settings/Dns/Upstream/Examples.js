@@ -120,6 +120,9 @@ const Examples = props => (
                     </Trans>
                 </span>
             </li>
+            <li>
+                <code>unbound</code> – <Trans>example_unbound</Trans>
+            </li>
         </ol>
     </div>
 );
