@@ -121,7 +121,23 @@ const Examples = props => (
                 </span>
             </li>
             <li>
-                <code>unbound</code> – <Trans>example_unbound</Trans>
+                <code>unbound</code> –&nbsp;
+                <span>
+                    <Trans
+                        components={[
+                            <a
+                                href="https://github.com/AdguardTeam/AdGuardHome/wiki/Unbound"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                key="0"
+                            >
+                                Link
+                            </a>,
+                        ]}
+                    >
+                        example_unbound
+                    </Trans>
+                </span>
             </li>
         </ol>
     </div>
