@@ -39,7 +39,7 @@ func initDNSServer(baseDir string) {
 		log.Fatalf("Cannot create DNS data dir at %s: %s", baseDir, err)
 	}
 
-	config.dnsServer = dnsforward.NewServer(baseDir)
+	config.dnsServer = dnsforward.NewServer(baseDir, false)
 
 	bindhost := config.DNS.BindHost
 	if config.DNS.BindHost == "0.0.0.0" {
@@ -57,6 +57,12 @@ func initDNSServer(baseDir string) {
 	config.dnsctx.rdnsIP = make(map[string]bool)
 	config.dnsctx.rdnsChannel = make(chan string, 256)
 	go asyncRDNSLoop()
+	go func() {
+		top := config.dnsServer.GetStatsTop(int(config.DNS.QueryLogInterval) * 24)
+		for k := range top.Clients {
+			beginAsyncRDNS(k)
+		}
+	}()
 }
 
 func isRunning() bool {
@@ -241,11 +247,6 @@ func startDNSServer() error {
 	err = config.dnsServer.Start(&newconfig)
 	if err != nil {
 		return errorx.Decorate(err, "Couldn't start forwarding DNS server")
-	}
-
-	top := config.dnsServer.GetStatsTop()
-	for k := range top.Clients {
-		beginAsyncRDNS(k)
 	}
 
 	return nil
