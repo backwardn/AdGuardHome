@@ -34,6 +34,9 @@ Contents:
 * Services Filter
 	* API: Get blocked services list
 	* API: Set blocked services list
+* Statistics
+	* API: Set statistics parameters
+	* API: Get statistics parameters
 
 
 ## First startup
@@ -800,3 +803,35 @@ Request:
 Response:
 
 	200 OK
+
+
+## Statistics
+
+### API: Set statistics parameters
+
+Request:
+
+	POST /control/stats_config
+
+	{
+		"interval": 1 | 7 | 30 | 90
+	}
+
+Response:
+
+	200 OK
+
+
+### API: Get statistics parameters
+
+Request:
+
+	GET /control/stats_info
+
+Response:
+
+	200 OK
+
+	{
+		"interval": 1 | 7 | 30 | 90
+	}
