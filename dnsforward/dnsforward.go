@@ -359,6 +359,13 @@ func (s *Server) GetQueryLog(rightOffset int) map[string]interface{} {
 	return s.queryLog.getQueryLog(rightOffset)
 }
 
+// ClearQueryLog clears query log
+func (s *Server) ClearQueryLog() {
+	s.Lock()
+	s.queryLog.clearQueryLog()
+	s.Unlock()
+}
+
 // GetStatsTop returns the current stop stats
 func (s *Server) GetStatsTop(hourOffset int) *StatsTop {
 	s.RLock()

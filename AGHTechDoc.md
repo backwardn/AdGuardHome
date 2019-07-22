@@ -38,6 +38,7 @@ Contents:
 	* API: Get query log
 	* API: Set query log parameters
 	* API: Get query log parameters
+	* API: Clear query log
 
 
 ## First startup
@@ -856,3 +857,16 @@ Response:
 	{
 		"interval": 1 | 7 | 30 | 90
 	}
+
+
+### API: Clear query log
+
+This command clears all query log data (both in memory and on disk).
+
+Request:
+
+	POST /control/querylog_clear
+
+Response:
+
+	200 OK

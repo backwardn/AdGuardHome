@@ -3,6 +3,7 @@ package dnsforward
 import (
 	"fmt"
 	"net"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -258,6 +259,29 @@ func (l *queryLog) getQueryLog(rightOffset int) map[string]interface{} {
 	obj["total"] = total
 	obj["data"] = data
 	return obj
+}
+
+// Clear memory buffer and remove, then reopen file
+func (l *queryLog) clearQueryLog() {
+	l.fileFlushLock.Lock()
+	defer l.fileFlushLock.Unlock()
+
+	l.logBufferLock.Lock()
+	l.logBuffer = []*logEntry{}
+	l.logBufferLock.Unlock()
+
+	if l.db == nil {
+		return
+	}
+
+	l.db.Close()
+	_ = os.Remove(l.logFile)
+
+	var err error
+	l.db, err = bolt.Open(l.logFile, 0644, nil)
+	if err != nil {
+		log.Error("bolt.Open: %s", err)
+	}
 }
 
 func answerToMap(a *dns.Msg) []map[string]interface{} {

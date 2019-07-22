@@ -249,6 +249,12 @@ func handleQueryLog(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func handleQueryLogClear(w http.ResponseWriter, r *http.Request) {
+	log.Tracef("%s %v", r.Method, r.URL)
+	config.dnsServer.ClearQueryLog()
+	returnOK(w)
+}
+
 func handleStatsTop(w http.ResponseWriter, r *http.Request) {
 	log.Tracef("%s %v", r.Method, r.URL)
 	s := config.dnsServer.GetStatsTop(int(config.DNS.QueryLogInterval) * 24)
@@ -1045,6 +1051,7 @@ func registerControlHandlers() {
 	http.Handle("/control/querylog", postInstallHandler(optionalAuthHandler(gziphandler.GzipHandler(ensurePOSTHandler(handleQueryLog)))))
 	http.HandleFunc("/control/querylog_config", postInstall(optionalAuth(ensurePOST(handleQueryLogConfig))))
 	http.HandleFunc("/control/querylog_info", postInstall(optionalAuth(ensureGET(handleQueryLogInfo))))
+	http.HandleFunc("/control/querylog_clear", postInstall(optionalAuth(ensurePOST(handleQueryLogClear))))
 	http.HandleFunc("/control/querylog_enable", postInstall(optionalAuth(ensurePOST(handleQueryLogEnable))))
 	http.HandleFunc("/control/querylog_disable", postInstall(optionalAuth(ensurePOST(handleQueryLogDisable))))
 	http.HandleFunc("/control/set_upstreams_config", postInstall(optionalAuth(ensurePOST(handleSetUpstreamConfig))))
