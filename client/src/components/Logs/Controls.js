@@ -9,6 +9,7 @@ const Controls = (props) => {
         toggleLogStatus,
         handleDownloadButton,
         getLogs,
+        clearLogs,
     } = props;
 
     if (queryLogEnabled) {
@@ -16,7 +17,7 @@ const Controls = (props) => {
             <Fragment>
                 <button
                     className="btn btn-gray btn-sm mr-2"
-                    type="submit"
+                    type="button"
                     onClick={() => toggleLogStatus(queryLogEnabled)}
                     disabled={logStatusProcessing}
                 >
@@ -24,14 +25,21 @@ const Controls = (props) => {
                 </button>
                 <button
                     className="btn btn-primary btn-sm mr-2"
-                    type="submit"
+                    type="button"
                     onClick={() => handleDownloadButton()}
                 >
                     <Trans>download_log_file_btn</Trans>
                 </button>
                 <button
+                    className="btn btn-outline-danger btn-sm mr-2"
+                    type="button"
+                    onClick={() => clearLogs()}
+                >
+                    <Trans>query_log_clear</Trans>
+                </button>
+                <button
                     className="btn btn-outline-primary btn-sm"
-                    type="submit"
+                    type="button"
                     onClick={() => getLogs()}
                 >
                     <Trans>refresh_btn</Trans>
@@ -58,6 +66,7 @@ Controls.propTypes = {
     toggleLogStatus: PropTypes.func.isRequired,
     handleDownloadButton: PropTypes.func.isRequired,
     getLogs: PropTypes.func.isRequired,
+    clearLogs: PropTypes.func.isRequired,
 };
 
 export default withNamespaces()(Controls);

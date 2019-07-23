@@ -7,6 +7,7 @@ import {
     setRules,
     addSuccessToast,
     getClients,
+    clearLogs,
 } from '../actions';
 import Logs from '../components/Logs';
 
@@ -24,6 +25,7 @@ const mapDispatchToProps = {
     setRules,
     addSuccessToast,
     getClients,
+    clearLogs,
 };
 
 export default connect(

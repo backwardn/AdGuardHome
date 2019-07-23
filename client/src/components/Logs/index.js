@@ -41,6 +41,13 @@ class Logs extends Component {
         }
     };
 
+    clearLogs = () => {
+        // eslint-disable-next-line no-alert
+        if (window.confirm(this.props.t('query_log_confirm_clear'))) {
+            this.props.clearLogs();
+        }
+    }
+
     renderTooltip = (isFiltered, rule, filter) =>
         (rule && isFiltered ? <PopoverFiltered rule={rule} filter={filter} /> : '');
 
@@ -338,6 +345,7 @@ class Logs extends Component {
                             toggleLogStatus={this.props.toggleLogStatus}
                             handleDownloadButton={this.handleDownloadButton}
                             getLogs={this.getLogs}
+                            clearLogs={this.clearLogs}
                         />
                     </div>
                 </PageTitle>
@@ -364,6 +372,7 @@ Logs.propTypes = {
     logStatusProcessing: PropTypes.bool,
     t: PropTypes.func,
     getClients: PropTypes.func.isRequired,
+    clearLogs: PropTypes.func.isRequired,
 };
 
 export default withNamespaces()(Logs);

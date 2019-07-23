@@ -231,9 +231,16 @@ const queryLogs = handleActions({
     [actions.downloadQueryLogRequest]: state => ({ ...state, logsDownloading: true }),
     [actions.downloadQueryLogFailure]: state => ({ ...state, logsDownloading: false }),
     [actions.downloadQueryLogSuccess]: state => ({ ...state, logsDownloading: false }),
+
+    [actions.clearLogsRequest]: state => ({ ...state, processingClear: true }),
+    [actions.clearLogsFailure]: state => ({ ...state, processingClear: false }),
+    [actions.clearLogsSuccess]: state => ({
+        ...state, logs: [], total: 0, processingClear: false,
+    }),
 }, {
     getLogsProcessing: false,
     logsDownloading: false,
+    processingClear: false,
     total: 0,
     logs: [],
 });
