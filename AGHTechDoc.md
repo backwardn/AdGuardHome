@@ -808,6 +808,15 @@ Response:
 
 ## Statistics
 
+Load
+. Load data from the last bucket from DB for the current hour
+
+Runtime
+. Update current unit
+. Check every second that current unit should be flushed
+ . If so, flush it, allocate a new unit
+
+
 ### API: Get statistics
 
 Request:
