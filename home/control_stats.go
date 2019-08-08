@@ -55,17 +55,6 @@ func handleStats(w http.ResponseWriter, r *http.Request) {
 	returnOK(w)
 }
 
-func handleStatsTop(w http.ResponseWriter, r *http.Request) {
-	log.Tracef("%s %v", r.Method, r.URL)
-	returnOK(w)
-}
-
-// HandleStatsHistory returns historical stats data for the 24 hours
-func handleStatsHistory(w http.ResponseWriter, r *http.Request) {
-	log.Tracef("%s %v", r.Method, r.URL)
-	returnOK(w)
-}
-
 // handleStatsReset resets the stats caches
 func handleStatsReset(w http.ResponseWriter, r *http.Request) {
 	log.Tracef("%s %v", r.Method, r.URL)
@@ -74,9 +63,7 @@ func handleStatsReset(w http.ResponseWriter, r *http.Request) {
 
 // RegisterStatsHandlers - register handlers
 func RegisterStatsHandlers() {
-	http.HandleFunc("/control/stats_top", postInstall(optionalAuth(ensureGET(handleStatsTop))))
 	http.HandleFunc("/control/stats", postInstall(optionalAuth(ensureGET(handleStats))))
-	http.HandleFunc("/control/stats_history", postInstall(optionalAuth(ensureGET(handleStatsHistory))))
 	http.HandleFunc("/control/stats_reset", postInstall(optionalAuth(ensurePOST(handleStatsReset))))
 	http.HandleFunc("/control/stats_config", postInstall(optionalAuth(ensurePOST(handleStatsConfig))))
 	http.HandleFunc("/control/stats_info", postInstall(optionalAuth(ensureGET(handleStatsInfo))))
