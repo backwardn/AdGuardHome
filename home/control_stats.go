@@ -52,7 +52,16 @@ func handleStatsConfig(w http.ResponseWriter, r *http.Request) {
 // handleStats returns aggregated stats data for the 24 hours
 func handleStats(w http.ResponseWriter, r *http.Request) {
 	log.Tracef("%s %v", r.Method, r.URL)
-	returnOK(w)
+
+	d := config.stats.Get()
+
+	data, err := json.Marshal(d)
+	if err != nil {
+		httpError(w, http.StatusInternalServerError, "json encode: %s", err)
+		return
+	}
+
+	w.Write(data)
 }
 
 // handleStatsReset resets the stats caches
