@@ -35,6 +35,7 @@ Contents:
 	* API: Get blocked services list
 	* API: Set blocked services list
 * Statistics
+	* API: Get statistics
 	* API: Set statistics parameters
 	* API: Get statistics parameters
 
@@ -806,6 +807,46 @@ Response:
 
 
 ## Statistics
+
+### API: Get statistics
+
+Request:
+
+	GET /control/stats
+
+Response:
+
+	200 OK
+
+	{
+		time_units: hours | days
+
+		num_dns_queries: 123
+		num_blocked_filtering: 123
+		num_replaced_safebrowsing: 123
+		num_replaced_safesearch: 123
+		num_replaced_parental: 123
+		avg_processing_time: 123
+
+		dns_queries: [123, ...]
+		blocked_filtering: [123, ...]
+		replaced_parental: [123, ...]
+		replaced_safebrowsing: [123, ...]
+
+		top_queried_domains: [
+			{host: 123},
+			...
+		]
+		top_blocked_domains: [
+			{host: 123},
+			...
+		]
+		top_clients: [
+			{IP: 123},
+			...
+		]
+	}
+
 
 ### API: Set statistics parameters
 
