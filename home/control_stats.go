@@ -19,13 +19,13 @@ func handleStatsInfo(w http.ResponseWriter, r *http.Request) {
 
 	jsonVal, err := json.Marshal(resp)
 	if err != nil {
-		httpError(w, http.StatusInternalServerError, "Couldn't marshal data into json: %s", err)
+		httpError(w, http.StatusInternalServerError, "json encode: %s", err)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	_, err = w.Write(jsonVal)
 	if err != nil {
-		httpError(w, http.StatusInternalServerError, "Unable to write response json: %s", err)
+		httpError(w, http.StatusInternalServerError, "http write: %s", err)
 	}
 }
 
