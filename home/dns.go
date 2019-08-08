@@ -181,5 +181,7 @@ func stopDNSServer() error {
 		return errorx.Decorate(err, "Couldn't stop forwarding DNS server")
 	}
 
+	config.stats.Close()
+
 	return nil
 }

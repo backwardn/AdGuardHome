@@ -30,6 +30,11 @@ func New(limit int) *Stats {
 	return &s
 }
 
+// Close - close global object
+func (s *Stats) Close() {
+
+}
+
 func (s *Stats) initUnit(u *unit) {
 	u.nResult = make([]int, P+1)
 	u.domains = make(map[string]int)
@@ -47,7 +52,7 @@ const (
 	P
 )
 
-// Entry - 1 stats unit
+// Entry - data to add
 type Entry struct {
 	Domain string
 	Client net.IP
