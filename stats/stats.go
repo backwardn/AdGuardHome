@@ -6,11 +6,17 @@ import (
 	"encoding/gob"
 	"fmt"
 	"net"
+	"sort"
 	"sync"
 	"time"
 
 	"github.com/AdguardTeam/golibs/log"
 	bolt "github.com/etcd-io/bbolt"
+)
+
+const (
+	maxDomains = 100
+	maxClients = 100
 )
 
 // Stats - global context
@@ -23,6 +29,7 @@ type Stats struct {
 	unitLock sync.Mutex
 }
 
+// data for 1 time unit
 type unit struct {
 	id int
 
@@ -37,15 +44,21 @@ type unit struct {
 	timeAvg int // usec
 }
 
+type countPair struct {
+	Name  string
+	Count uint
+}
+
+// structure for storing data in file
 type unitDB struct {
-	NTotal  int
+	NTotal  uint
 	NResult []int
 
-	// Domains        [string]int
-	// BlockedDomains [string]int
-	// Clients        [string]int
+	Domains        []countPair
+	BlockedDomains []countPair
+	Clients        []countPair
 
-	TimeAvg int // usec
+	TimeAvg uint // usec
 }
 
 // New - create object
@@ -66,11 +79,13 @@ func New(filename string, limit int) *Stats {
 	log.Tracef("db.Open")
 
 	u := unit{}
-	u.id = unitID()
 	s.initUnit(&u)
-	_ = s.loadUnitFromDB(&u, u.id)
+	u.id = unitID()
+	udb := s.loadUnitFromDB(u.id)
+	if udb != nil {
+		deserialize(&u, udb)
+	}
 	s.unit = &u
-	s.unit.timeAvg = 0
 
 	go s.periodicFlush()
 	return &s
@@ -122,8 +137,8 @@ func (s *Stats) dbBeginTxn(wr bool) *bolt.Tx {
 	return tx
 }
 
-func unitName(u *unit) []byte {
-	t := time.Unix(int64(u.id)*60*60, 0)
+func unitName(id int) []byte {
+	t := time.Unix(int64(id)*60*60, 0)
 	s := fmt.Sprintf("%04d%02d%02d%02d", t.Year(), t.Month(), t.Day(), t.Hour())
 	return []byte(s)
 }
@@ -152,14 +167,60 @@ func (s *Stats) periodicFlush() {
 	log.Tracef("periodicFlush() exited")
 }
 
+func convertMapToArray(m map[string]int, max int) []countPair {
+	a := []countPair{}
+	for k, v := range m {
+		pair := countPair{}
+		pair.Name = k
+		pair.Count = uint(v)
+		a = append(a, pair)
+	}
+	less := func(i, j int) bool {
+		if a[i].Count < a[j].Count {
+			return true
+		}
+		return false
+	}
+	sort.Slice(a, less)
+	if max > len(a) {
+		max = len(a)
+	}
+	return a[:max]
+}
+
+func convertArrayToMap(a []countPair) map[string]int {
+	m := map[string]int{}
+	for _, it := range a {
+		m[it.Name] = int(it.Count)
+	}
+	return m
+}
+
+func serialize(u *unit) *unitDB {
+	u.timeAvg = u.timeSum / u.nTotal
+	udb := unitDB{}
+	udb.NTotal = uint(u.nTotal)
+	udb.NResult = u.nResult
+	udb.TimeAvg = uint(u.timeAvg)
+	udb.Domains = convertMapToArray(u.domains, maxDomains)
+	udb.BlockedDomains = convertMapToArray(u.blockedDomains, maxDomains)
+	udb.Clients = convertMapToArray(u.clients, maxClients)
+	return &udb
+}
+
+func deserialize(u *unit, udb *unitDB) {
+	u.nTotal = int(udb.NTotal)
+	u.nResult = udb.NResult
+	u.domains = convertArrayToMap(udb.Domains)
+	u.blockedDomains = convertArrayToMap(udb.BlockedDomains)
+	u.clients = convertArrayToMap(udb.Clients)
+	u.timeSum = int(udb.TimeAvg) * u.nTotal
+}
+
 func (s *Stats) flushUnitToDB(u *unit) {
 	log.Tracef("Flushing unit %d", u.id)
 
-	u.timeAvg = u.timeSum / u.nTotal
-	udb := unitDB{}
-	udb.NTotal = u.nTotal
-	udb.NResult = u.nResult
-	udb.TimeAvg = u.timeAvg
+	udb := serialize(u)
 
 	tx := s.dbBeginTxn(true)
 	if tx == nil {
@@ -167,7 +228,7 @@ func (s *Stats) flushUnitToDB(u *unit) {
 	}
 	defer tx.Rollback()
 
-	bkt, err := tx.CreateBucketIfNotExists(unitName(u))
+	bkt, err := tx.CreateBucketIfNotExists(unitName(u.id))
 	if err != nil {
 		log.Error("tx.CreateBucketIfNotExists: %s", err)
 		return
@@ -192,29 +253,30 @@ func (s *Stats) flushUnitToDB(u *unit) {
 	log.Tracef("tx.Commit")
 }
 
-func (s *Stats) loadUnitFromDB(u *unit, id int) bool {
+func (s *Stats) loadUnitFromDB(id int) *unitDB {
+	log.Tracef("Loading unit %d", id)
 	tx := s.dbBeginTxn(false)
 	if tx == nil {
-		return false
+		return nil
 	}
 	defer tx.Rollback()
 
-	u.id = id
-	bkt := tx.Bucket(unitName(u))
+	bkt := tx.Bucket(unitName(id))
 	if bkt == nil {
-		return false
+		return nil
 	}
 
 	var buf bytes.Buffer
 	buf.Write(bkt.Get([]byte{0}))
 	dec := gob.NewDecoder(&buf)
-	err := dec.Decode(&u)
+	udb := unitDB{}
+	err := dec.Decode(&udb)
 	if err != nil {
 		log.Error("gob Decode: %s", err)
-		return false
+		return nil
 	}
 
-	return true
+	return &udb
 }
 
 type Result int
