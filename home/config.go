@@ -70,7 +70,7 @@ type configuration struct {
 	controlLock      sync.Mutex
 	transport        *http.Transport
 	client           *http.Client
-	stats            *stats.Stats
+	stats            stats.Stats
 
 	// cached version.json to avoid hammering github.io for each page reload
 	versionCheckJSON     []byte

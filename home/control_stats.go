@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/AdguardTeam/AdGuardHome/stats"
 	"github.com/AdguardTeam/golibs/log"
 )
 
@@ -11,6 +12,7 @@ type statsConfig struct {
 	Interval uint `json:"interval"`
 }
 
+// Get stats configuration
 func handleStatsInfo(w http.ResponseWriter, r *http.Request) {
 	log.Tracef("%s %v", r.Method, r.URL)
 
@@ -29,6 +31,7 @@ func handleStatsInfo(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Set stats configuration
 func handleStatsConfig(w http.ResponseWriter, r *http.Request) {
 	log.Tracef("%s %v", r.Method, r.URL)
 
@@ -45,15 +48,22 @@ func handleStatsConfig(w http.ResponseWriter, r *http.Request) {
 	}
 
 	config.DNS.StatsInterval = reqData.Interval
+	config.stats.Configurate(int(config.DNS.StatsInterval))
 
-	httpUpdateConfigReloadDNSReturnOK(w, r)
+	returnOK(w)
 }
 
-// handleStats returns aggregated stats data for the 24 hours
+// handleStats returns aggregated stats data
 func handleStats(w http.ResponseWriter, r *http.Request) {
 	log.Tracef("%s %v", r.Method, r.URL)
 
-	d := config.stats.Get()
+	units := stats.Hours
+	if config.DNS.StatsInterval > 7 {
+		units = stats.Days
+	}
+	counter := log.StartTimer()
+	d := config.stats.GetData(units)
+	counter.LogElapsed("Stats: prepared data")
 
 	data, err := json.Marshal(d)
 	if err != nil {
@@ -64,7 +74,7 @@ func handleStats(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
-// handleStatsReset resets the stats caches
+// handleStatsReset resets the stats
 func handleStatsReset(w http.ResponseWriter, r *http.Request) {
 	log.Tracef("%s %v", r.Method, r.URL)
 	returnOK(w)

@@ -41,7 +41,7 @@ type Server struct {
 	dnsProxy  *proxy.Proxy         // DNS proxy instance
 	dnsFilter *dnsfilter.Dnsfilter // DNS filter instance
 	queryLog  *queryLog            // Query log instance
-	stats     *stats.Stats
+	stats     stats.Stats
 
 	AllowedClients         map[string]bool // IP addresses of whitelist clients
 	DisallowedClients      map[string]bool // IP addresses of clients that should be blocked
@@ -56,7 +56,7 @@ type Server struct {
 // NewServer creates a new instance of the dnsforward.Server
 // baseDir is the base directory for query logs
 // Note: this function must be called only once
-func NewServer(baseDir string, stats *stats.Stats) *Server {
+func NewServer(baseDir string, stats stats.Stats) *Server {
 	s := &Server{
 		queryLog: newQueryLog(baseDir),
 	}
@@ -484,21 +484,21 @@ func (s *Server) updateStats(d *proxy.DNSContext, elapsed time.Duration, res dns
 	case dnsfilter.NotFilteredWhiteList:
 		fallthrough
 	case dnsfilter.NotFilteredError:
-		e.Result = stats.NF
+		e.Result = stats.RNotFiltered
 
 	case dnsfilter.FilteredSafeBrowsing:
-		e.Result = stats.SB
+		e.Result = stats.RSafeBrowsing
 	case dnsfilter.FilteredParental:
-		e.Result = stats.P
+		e.Result = stats.RParental
 	case dnsfilter.FilteredSafeSearch:
-		e.Result = stats.SS
+		e.Result = stats.RSafeSearch
 
 	case dnsfilter.FilteredBlackList:
 		fallthrough
 	case dnsfilter.FilteredInvalid:
 		fallthrough
 	case dnsfilter.FilteredBlockedService:
-		e.Result = stats.F
+		e.Result = stats.RFiltered
 	}
 	s.stats.Update(e)
 }
